@@ -9,6 +9,7 @@ public class Main {
 
     private static final String letters = "abc";
     private static final int length = 100_000;
+
     public static void main(String[] args) {
 
         ArrayBlockingQueue<String> arA = new ArrayBlockingQueue<>(100);
@@ -25,7 +26,7 @@ public class Main {
                     arB.put(generateText(letters, length));
                     arC.put(generateText(letters, length));
 
-                   } catch (InterruptedException e) {
+                } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
             }
@@ -35,7 +36,7 @@ public class Main {
             String maxChars = null;
             int maxLengthChars = 0;
             for (int i = 0; i < 10_000; i++) {
-                if(maxChars == null) {
+                if (maxChars == null) {
                     try {
                         maxChars = arA.take();
                     } catch (InterruptedException e) {
@@ -52,7 +53,7 @@ public class Main {
                     throw new RuntimeException(e);
                 }
                 int lengthText = maxCharsText(maxChars, 'a');
-                if(lengthText > maxLengthChars) {
+                if (lengthText > maxLengthChars) {
                     maxChars = text;
                     maxLengthChars = lengthText;
                 }
@@ -64,7 +65,7 @@ public class Main {
             String maxChars = null;
             int maxLengthChars = 0;
             for (int i = 0; i < 10_000; i++) {
-                if(maxChars == null) {
+                if (maxChars == null) {
                     try {
                         maxChars = arB.take();
                     } catch (InterruptedException e) {
@@ -81,7 +82,7 @@ public class Main {
                     throw new RuntimeException(e);
                 }
                 int lengthText = maxCharsText(maxChars, 'b');
-                if(lengthText > maxLengthChars) {
+                if (lengthText > maxLengthChars) {
                     maxChars = text;
                     maxLengthChars = lengthText;
                 }
@@ -93,7 +94,7 @@ public class Main {
             String maxChars = null;
             int maxLengthChars = 0;
             for (int i = 0; i < 10_000; i++) {
-                if(maxChars == null) {
+                if (maxChars == null) {
                     try {
                         maxChars = arC.take();
                     } catch (InterruptedException e) {
@@ -103,14 +104,14 @@ public class Main {
                     maxLengthChars = maxCharsText(maxChars, 'c');
                     continue;
                 }
-                String text ;
+                String text;
                 try {
                     text = arC.take();
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
                 int lengthText = maxCharsText(maxChars, 'c');
-                if(lengthText > maxLengthChars) {
+                if (lengthText > maxLengthChars) {
                     maxChars = text;
                     maxLengthChars = lengthText;
                 }
