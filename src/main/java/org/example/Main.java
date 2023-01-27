@@ -8,13 +8,13 @@ import java.util.concurrent.Executors;
 public class Main {
 
     private static final String letters = "abc";
-    private static final int length = 100_000;
+    private static final int length = 10_000;
+
+    static ArrayBlockingQueue<String> arA = new ArrayBlockingQueue<>(100);
+    static ArrayBlockingQueue<String> arB = new ArrayBlockingQueue<>(100);
+    static ArrayBlockingQueue<String> arC = new ArrayBlockingQueue<>(100);
 
     public static void main(String[] args) {
-
-        ArrayBlockingQueue<String> arA = new ArrayBlockingQueue<>(100);
-        ArrayBlockingQueue<String> arB = new ArrayBlockingQueue<>(100);
-        ArrayBlockingQueue<String> arC = new ArrayBlockingQueue<>(100);
 
 
         ExecutorService service = Executors.newFixedThreadPool(4);
@@ -32,92 +32,9 @@ public class Main {
             }
         });
 
-        service.submit(() -> {
-            String maxChars = null;
-            int maxLengthChars = 0;
-            for (int i = 0; i < 10_000; i++) {
-                if (maxChars == null) {
-                    try {
-                        maxChars = arA.take();
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-
-                    maxLengthChars = maxCharsText(maxChars, 'a');
-                    continue;
-                }
-                String text;
-                try {
-                    text = arA.take();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                int lengthText = maxCharsText(maxChars, 'a');
-                if (lengthText > maxLengthChars) {
-                    maxChars = text;
-                    maxLengthChars = lengthText;
-                }
-            }
-            System.out.println("Самое большое количество символов в строке: " + maxLengthChars);
-        });
-
-        service.submit(() -> {
-            String maxChars = null;
-            int maxLengthChars = 0;
-            for (int i = 0; i < 10_000; i++) {
-                if (maxChars == null) {
-                    try {
-                        maxChars = arB.take();
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-
-                    maxLengthChars = maxCharsText(maxChars, 'b');
-                    continue;
-                }
-                String text;
-                try {
-                    text = arB.take();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                int lengthText = maxCharsText(maxChars, 'b');
-                if (lengthText > maxLengthChars) {
-                    maxChars = text;
-                    maxLengthChars = lengthText;
-                }
-            }
-            System.out.println("Самое большое количество символов в строке: " + maxLengthChars);
-        });
-
-        service.submit(() -> {
-            String maxChars = null;
-            int maxLengthChars = 0;
-            for (int i = 0; i < 10_000; i++) {
-                if (maxChars == null) {
-                    try {
-                        maxChars = arC.take();
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-
-                    maxLengthChars = maxCharsText(maxChars, 'c');
-                    continue;
-                }
-                String text;
-                try {
-                    text = arC.take();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                int lengthText = maxCharsText(maxChars, 'c');
-                if (lengthText > maxLengthChars) {
-                    maxChars = text;
-                    maxLengthChars = lengthText;
-                }
-            }
-            System.out.println("Самое большое количество символов в строке: " + maxLengthChars);
-        });
+        service.submit(new MyRunnable('a', arA));
+        service.submit(new MyRunnable('b', arB));
+        service.submit(new MyRunnable('c', arC));
 
         service.shutdown();
     }
@@ -133,5 +50,46 @@ public class Main {
             text.append(letters.charAt(random.nextInt(letters.length())));
         }
         return text.toString();
+    }
+
+    static class MyRunnable implements Runnable {
+
+        private final char aChar;
+        private final ArrayBlockingQueue<String> arr;
+
+        public MyRunnable(char aChar, ArrayBlockingQueue<String> arr) {
+            this.aChar = aChar;
+            this.arr = arr;
+        }
+
+        @Override
+        public void run() {
+            String maxChars = null;
+            int maxLengthChars = 0;
+            for (int i = 0; i < 10_000; i++) {
+                if (maxChars == null) {
+                    try {
+                        maxChars = arr.take();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    maxLengthChars = maxCharsText(maxChars, aChar);
+                    continue;
+                }
+                String text;
+                try {
+                    text = arr.take();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                int lengthText = maxCharsText(maxChars, aChar);
+                if (lengthText > maxLengthChars) {
+                    maxChars = text;
+                    maxLengthChars = lengthText;
+                }
+            }
+            System.out.println("Самое большое количество символов в строке: " + maxLengthChars);
+        }
     }
 }
